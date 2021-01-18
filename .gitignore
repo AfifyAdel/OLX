@@ -1,0 +1,10 @@
+/API/API/bin
+/API/API/obj
+/API/Application/obj
+/API/Application/bin
+/API/Domain/bin
+/API/Domain/obj
+/API/Infrastructure/bin
+/API/Infrastructure/obj
+/API/Persistence/bin
+/API/Persistence/obj
