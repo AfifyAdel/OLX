@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Services;
 using Domain;
+using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -30,25 +32,11 @@ namespace API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var identity = services.AddIdentity<AppUser, Role>(opt =>
-             {
-                 var passwordManager = opt.Password;
-                 passwordManager.RequireDigit = false;
-                 passwordManager.RequireLowercase = false;
-                 passwordManager.RequireNonAlphanumeric = false;
-                 passwordManager.RequireUppercase = false;
-             });
-            var identityBuilder = new IdentityBuilder(identity.UserType, typeof(Role), identity.Services);
-            identityBuilder.AddEntityFrameworkStores<DataContext>();
-            identityBuilder.AddUserManager<UserManager<AppUser>>();
-            identityBuilder.AddSignInManager<SignInManager<AppUser>>();
-            identityBuilder.AddRoleValidator<RoleValidator<Role>>();
-            identityBuilder.AddRoleManager<RoleManager<Role>>();
-            services.AddDbContext<DataContext>(opt =>
-            {
-                opt.UseNpgsql(Configuration.GetConnectionString("default"));
-            });
-            services.AddControllers();
+
+            services.AddUserIdentity();
+            services.AddPostgreSQL(Configuration);
+            services.AddMediatR(typeof(Startup).GetType().Assembly);
+            services.AddControllers().AddNewtonsoftJson();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
