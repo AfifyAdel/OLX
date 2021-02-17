@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Services;
+using Application.Interfaces;
 using Domain;
+using Infrastructure.Tokens;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -36,11 +38,15 @@ namespace API
             services.AddUserIdentity();
             services.AddPostgreSQL(Configuration);
             services.AddMediatR(typeof(Startup).GetType().Assembly);
+            services.AddJwt(Configuration);
             services.AddControllers().AddNewtonsoftJson();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
             });
+
+            services.AddScoped<IJwtGenerator,JwtGenerator>();
+            services.AddScoped<IRefreshTokenGenerator, RefreshGenerator>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -56,6 +62,8 @@ namespace API
             //app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseAuthentication();
 
             app.UseAuthorization();
 

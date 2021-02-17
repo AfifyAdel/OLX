@@ -18,5 +18,6 @@ namespace Domain
         [DataType(DataType.Date)]
         public DateTime? Birthday { get; set; }
         public ICollection<UserRoles> UserRoles { get; set; }
+        public ICollection<RefreshToken> RefreshTokens { get; set; }
     }
 }

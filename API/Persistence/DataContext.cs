@@ -31,6 +31,14 @@ namespace Persistence
                 //User
                 opt.HasOne(x => x.AppUser).WithMany(x => x.UserRoles).HasForeignKey(x => x.UserId).IsRequired();
             });
+
+            builder.Entity<RefreshToken>(opt =>
+            {
+                //User wirh Tokens
+                opt.HasOne(x => x.AppUser).WithMany(x => x.RefreshTokens).HasForeignKey(x => x.UserId);
+
+                opt.HasIndex(x => x.Token);
+            });
         }
     }
 }
