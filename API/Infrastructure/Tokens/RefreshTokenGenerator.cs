@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Infrastructure.Tokens
 {
-    public class RefreshGenerator : IRefreshTokenGenerator
+    public class RefreshTokenGenerator : IRefreshTokenGenerator
     {
         public string Generate(string userName = null)
         {

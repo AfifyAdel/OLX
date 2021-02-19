@@ -4,7 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Services;
 using Application.Interfaces;
+using Application.RequestsHandler.User;
 using Domain;
+using FluentValidation.AspNetCore;
 using Infrastructure.Tokens;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
@@ -37,16 +39,18 @@ namespace API
 
             services.AddUserIdentity();
             services.AddPostgreSQL(Configuration);
-            services.AddMediatR(typeof(Startup).GetType().Assembly);
+            services.AddMediatR(typeof(Register.Handler).Assembly);
             services.AddJwt(Configuration);
             services.AddControllers().AddNewtonsoftJson();
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
-            });
+            //services.AddSwaggerGen(c =>
+            //{
+            //    c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
+            //});
+            services.AddMvc().AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Register>());
+
 
             services.AddScoped<IJwtGenerator,JwtGenerator>();
-            services.AddScoped<IRefreshTokenGenerator, RefreshGenerator>();
+            services.AddScoped<IRefreshTokenGenerator, RefreshTokenGenerator>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -55,8 +59,8 @@ namespace API
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1"));
+                //app.UseSwagger();
+                //app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1"));
             }
 
             //app.UseHttpsRedirection();

@@ -62,7 +62,7 @@ namespace API.Services
                 {
                     OnMessageReceived = context =>
                     {
-                        var token = context.Request.Cookies.TryGetValue("_token", out string jwt);
+                        var token = context.Request.Cookies.TryGetValue("_aid", out string jwt);
                         if (token)
                         {
                             context.Token = jwt;
