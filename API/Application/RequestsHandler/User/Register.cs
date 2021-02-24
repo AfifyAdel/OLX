@@ -44,10 +44,11 @@ namespace Application.RequestsHandler.User
             private readonly IJwtGenerator jwtGenerator;
             private readonly IRefreshTokenGenerator refreshTokenGenerator;
             private readonly IHttpContextAccessor contextAccessor;
+            private readonly IAuthCookies authCookies;
 
             public Handler(DataContext dataContext, UserManager<AppUser> userManager,RoleManager<Role> roleManager,
                 IJwtGenerator jwtGenerator, IRefreshTokenGenerator refreshTokenGenerator,
-                IHttpContextAccessor contextAccessor)
+                IHttpContextAccessor contextAccessor,IAuthCookies authCookies)
             {
                 this.dataContext = dataContext;
                 this.userManager = userManager;
@@ -55,6 +56,7 @@ namespace Application.RequestsHandler.User
                 this.jwtGenerator = jwtGenerator;
                 this.refreshTokenGenerator = refreshTokenGenerator;
                 this.contextAccessor = contextAccessor;
+                this.authCookies = authCookies;
             }
             public async Task<AuthUserDTO> Handle(Command request, CancellationToken cancellationToken)
             {
@@ -74,11 +76,20 @@ namespace Application.RequestsHandler.User
                 var roleResult = await userManager.AddToRoleAsync(user, "Normal");
                 if (response.Succeeded && roleResult.Succeeded)
                 {
-                    var accessToken = await jwtGenerator.Generate(user);
                     var refreshToken = refreshTokenGenerator.Generate(user.UserName);
-                    contextAccessor.HttpContext.Response.Cookies.Append("_aid", accessToken);
-                    contextAccessor.HttpContext.Response.Cookies.Append("_rid", refreshToken);
-                    return new AuthUserDTO(user);
+                    await dataContext.RefreshTokens.AddAsync(new RefreshToken
+                    {
+                        Token = refreshToken,
+                        CreatedAt = DateTime.UtcNow,
+                        AppUser = user,
+                        ExpireAt = DateTime.UtcNow.AddDays(2)
+                    });
+                    var success = await dataContext.SaveChangesAsync() > 0;
+                    if (success)
+                    {
+                        await authCookies.SendAuthCookies(user, refreshToken);
+                        return new AuthUserDTO(user);
+                    }
                 }
                 throw new Exception("Server error - Register");
             }

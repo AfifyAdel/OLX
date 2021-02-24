@@ -2,12 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Middlewares;
 using API.Services;
 using Application.Interfaces;
 using Application.RequestsHandler.User;
 using Domain;
 using FluentValidation.AspNetCore;
 using Infrastructure.Tokens;
+using Infrastructure.User;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -48,14 +50,20 @@ namespace API
             //});
             services.AddMvc().AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Register>());
 
-
+            services.AddHttpContextAccessor();
             services.AddScoped<IJwtGenerator,JwtGenerator>();
             services.AddScoped<IRefreshTokenGenerator, RefreshTokenGenerator>();
+            services.AddScoped<ICurrentUser, CurrentUser>();
+            services.AddScoped<ITokenGenerator, TokenGenerator>();
+            services.AddScoped<IAuthCookies, AuthCookies>();
+            services.AddScoped<IRefreshTokenGenerator, RefreshTokenGenerator>();
+           
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseMiddleware<ErrorHandlingMiddleware>();
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
