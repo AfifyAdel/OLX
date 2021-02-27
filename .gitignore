@@ -9,3 +9,5 @@
 /API/Persistence/bin
 /API/Persistence/obj
 /API/.vs
+/Web/OLX/node_modules/@ngtools
+/Web/OLX/node_modules
